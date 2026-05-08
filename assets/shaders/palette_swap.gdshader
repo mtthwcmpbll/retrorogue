@@ -22,27 +22,6 @@ shader_type canvas_item;
 
 uniform sampler2D palette : filter_nearest, repeat_disable;
 
-// EGA reference colors, normalized to 0..1.  0xAA / 255 ≈ 0.6667,
-// 0x55 / 255 ≈ 0.3333.  Order MUST match tools/generate_tiles.py.
-const vec3 EGA[16] = vec3[](
-    vec3(0.0,    0.0,    0.0   ), //  0 black
-    vec3(0.0,    0.0,    0.6667), //  1 blue
-    vec3(0.0,    0.6667, 0.0   ), //  2 green
-    vec3(0.0,    0.6667, 0.6667), //  3 cyan
-    vec3(0.6667, 0.0,    0.0   ), //  4 red
-    vec3(0.6667, 0.0,    0.6667), //  5 magenta
-    vec3(0.6667, 0.3333, 0.0   ), //  6 brown
-    vec3(0.6667, 0.6667, 0.6667), //  7 light gray
-    vec3(0.3333, 0.3333, 0.3333), //  8 dark gray
-    vec3(0.3333, 0.3333, 1.0   ), //  9 bright blue
-    vec3(0.3333, 1.0,    0.3333), // 10 bright green
-    vec3(0.3333, 1.0,    1.0   ), // 11 bright cyan
-    vec3(1.0,    0.3333, 0.3333), // 12 bright red
-    vec3(1.0,    0.3333, 1.0   ), // 13 bright magenta
-    vec3(1.0,    1.0,    0.3333), // 14 bright yellow
-    vec3(1.0,    1.0,    1.0   )  // 15 bright white
-);
-
 void fragment() {
     vec4 src = texture(TEXTURE, UV);
 
@@ -50,6 +29,29 @@ void fragment() {
     if (src.a < 0.01) {
         discard;
     }
+
+    // EGA reference colors, normalized to 0..1.  0xAA / 255 ≈ 0.6667,
+    // 0x55 / 255 ≈ 0.3333.  Order MUST match tools/generate_tiles.py.
+    // Declared inside fragment() because Godot's shading language does
+    // not support const arrays at global scope.
+    const vec3 EGA[16] = {
+        vec3(0.0,    0.0,    0.0   ), //  0 black
+        vec3(0.0,    0.0,    0.6667), //  1 blue
+        vec3(0.0,    0.6667, 0.0   ), //  2 green
+        vec3(0.0,    0.6667, 0.6667), //  3 cyan
+        vec3(0.6667, 0.0,    0.0   ), //  4 red
+        vec3(0.6667, 0.0,    0.6667), //  5 magenta
+        vec3(0.6667, 0.3333, 0.0   ), //  6 brown
+        vec3(0.6667, 0.6667, 0.6667), //  7 light gray
+        vec3(0.3333, 0.3333, 0.3333), //  8 dark gray
+        vec3(0.3333, 0.3333, 1.0   ), //  9 bright blue
+        vec3(0.3333, 1.0,    0.3333), // 10 bright green
+        vec3(0.3333, 1.0,    1.0   ), // 11 bright cyan
+        vec3(1.0,    0.3333, 0.3333), // 12 bright red
+        vec3(1.0,    0.3333, 1.0   ), // 13 bright magenta
+        vec3(1.0,    1.0,    0.3333), // 14 bright yellow
+        vec3(1.0,    1.0,    1.0   )  // 15 bright white
+    };
 
     // Find nearest EGA index by squared RGB distance.
     int best = 0;
