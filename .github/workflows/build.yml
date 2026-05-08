@@ -76,7 +76,11 @@ jobs:
           "$GODOT_BIN" --headless --import
 
       - name: Build C# project
-        run: dotnet build --configuration Release --no-restore
+        # Godot's generated .sln only defines Debug / ExportDebug /
+        # ExportRelease (no plain Release), and `godot ... scene.tscn`
+        # picks up the Debug assembly when running scenes, so build
+        # Debug here to match what the smoke test will load.
+        run: dotnet build --configuration Debug --no-restore
 
       - name: Run scene smoke test
         run: |
@@ -106,6 +110,6 @@ jobs:
           fi
           for proj in "${test_projects[@]}"; do
             echo "::group::dotnet test $proj"
-            dotnet test "$proj" --configuration Release --no-build --verbosity normal
+            dotnet test "$proj" --configuration Debug --no-build --verbosity normal
             echo "::endgroup::"
           done
