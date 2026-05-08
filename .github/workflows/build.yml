@@ -22,6 +22,18 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Install rendering deps (xvfb + software OpenGL)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            xvfb \
+            libgl1 \
+            libglx-mesa0 \
+            libgl1-mesa-dri \
+            libegl1 \
+            libegl-mesa0 \
+            libglu1-mesa
+
       - name: Set up .NET 8
         uses: actions/setup-dotnet@v4
         with:
@@ -66,10 +78,26 @@ jobs:
       - name: Build C# project
         run: dotnet build --configuration Release --no-restore
 
-      - name: Run tests
+      - name: Run scene smoke test
+        run: |
+          # Loads the real Main.tscn under a software OpenGL context,
+          # samples viewport pixels, and asserts the map area renders
+          # multiple distinct colors. A solid-color result (the
+          # symptom of a broken canvas_item shader) fails the build.
+          #
+          # gl_compatibility + opengl3 lets us run on llvmpipe without
+          # needing Vulkan in CI; the canvas_item shader is renderer-
+          # agnostic so this still exercises shader parse + compile.
+          set -euo pipefail
+          xvfb-run -a "$GODOT_BIN" \
+            --rendering-driver opengl3 \
+            --rendering-method gl_compatibility \
+            res://tests/SceneSmokeTest.tscn
+
+      - name: Run dotnet tests (if any)
         run: |
           # `dotnet test` against the game project itself errors out because
-          # it isn't a test SDK project, so only run it when a *.Tests.csproj
+          # it isn't a test SDK project, so only run it when a *Tests.csproj
           # actually exists. Add one and this step will pick it up.
           mapfile -t test_projects < <(find . -type f \( -name '*.Tests.csproj' -o -name '*Tests.csproj' \) -not -path '*/bin/*' -not -path '*/obj/*')
           if [ "${#test_projects[@]}" -eq 0 ]; then
