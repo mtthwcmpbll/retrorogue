@@ -1,0 +1,20 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Launch (Godot 4 Mono)",
+            "type": "godot-mono",
+            "request": "launch",
+            "preLaunchTask": "build",
+            "mode": "playInEditor",
+            "internalConsoleOptions": "openOnSessionStart"
+        },
+        {
+            "name": "Attach (Godot 4 Mono)",
+            "type": "godot-mono",
+            "request": "attach",
+            "address": "127.0.0.1",
+            "port": 23685
+        }
+    ]
+}

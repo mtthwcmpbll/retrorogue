@@ -1,0 +1,31 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "build",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "build",
+                "${workspaceFolder}/UltimaLikeRoguelike.sln",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:NoSummary"
+            ],
+            "problemMatcher": "$msCompile",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "regenerate tiles",
+            "command": "python3",
+            "type": "process",
+            "args": [
+                "${workspaceFolder}/tools/generate_tiles.py"
+            ],
+            "problemMatcher": [],
+            "detail": "Re-runs tools/generate_tiles.py to rebuild assets/tiles/atlas.png"
+        }
+    ]
+}
