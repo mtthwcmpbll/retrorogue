@@ -47,7 +47,7 @@ public partial class Main : Node2D
 
 	private void BuildWorld()
 	{
-		int seed = (int)(Time.GetUnixTimeFromSystem() & 0x7fffffff);
+		int seed = (int)((long)Time.GetUnixTimeFromSystem() & 0x7fffffff);
 		GD.Print($"[world] seed = {seed}");
 
 		var world = WorldGenerator.Generate(seed);
