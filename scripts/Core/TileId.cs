@@ -65,4 +65,20 @@ public static class TileId
     public const int Peasant        = 45;
     public const int Guard          = 46;
     public const int Innkeeper      = 47;
+
+    // Row 6 - biome terrain
+    public const int DesertSand     = 48;
+    public const int Cactus         = 49;
+    public const int SnowGround     = 50;
+    public const int IcePatch       = 51;
+    public const int PineTree       = 52;
+    public const int DeadTree       = 53;
+    public const int AshGround      = 54;
+    public const int Lava           = 55;
+
+    // Row 7 - biome detail
+    public const int VolcanicRock   = 56;
+    public const int DenseForest    = 57;
+    public const int SnowyPine      = 58;
+    public const int SandDune       = 59;
 }

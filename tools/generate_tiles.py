@@ -967,8 +967,238 @@ TILES[47] = t(  # Innkeeper
     '....88.88.88....',
 )
 
-# Slots 48..63 reserved for future tiles
-for tid in range(48, 64):
+# ---- Row 6: biome terrain 48..55 -------------------------------------------
+TILES[48] = t(  # Desert Sand (cracked, more brown than beach sand)
+    'eee6eeeeeeeeeeee',
+    'ee66eeeeeeee6eee',
+    'eee6eeeeeeee66ee',
+    'eeeeeeeeeeeee6ee',
+    'eeeeeeee666eeeee',
+    '6eeeeeeeeee6eeee',
+    '6eeeeeeeeeee6eee',
+    '6eeeee6eeeeee6ee',
+    'eeeeee66eeeeeeee',
+    'eeeeeeee6eeeeeee',
+    'eeeeeeeee6eee6ee',
+    'eeeeee6eeeeee6ee',
+    'eeeee66eeeeeeeee',
+    'eeeee6eeeeeee666',
+    'eeeeeeeeeeeeeeee',
+    'eeee666eeeeeeeee',
+)
+
+TILES[49] = t(  # Cactus (green columns with brown base)
+    '2222222222222222',
+    '22222222a2222222',
+    '2222222a2a222222',
+    '22a2222a2a22a222',
+    '2a2a222a2a2a2a22',
+    '2a2a2aa2aaa2a2a2',
+    '2a2a2a222a2a2a22',
+    '2a2aaa222aaaaa22',
+    '2aaa2222222222a2',
+    '22a22222a2222222',
+    '22a2222a2a222222',
+    '22a2222a2a222222',
+    '22aaaaaaaaa22222',
+    '2222a2222a222222',
+    '2226aaaaa6222222',
+    '2226666666222222',
+)
+
+TILES[50] = t(  # Snow Ground (white with faint flecks)
+    'fffffffffffffffe',
+    'ffffefffffffffff',
+    'fffffffffffefeff',
+    'ffeffffffffffffe',
+    'ffffffffefffffff',
+    'fffffffffffffeff',
+    'fefffffffffffeff',
+    'ffffffffeffffffe',
+    'ffffefffffffffff',
+    'fffffffffffefffe',
+    'feffffffffffffff',
+    'ffffffefffffffff',
+    'fffffffffeffffff',
+    'fffefffffffffffe',
+    'fffffffffeffffff',
+    'effffffffffffeff',
+)
+
+TILES[51] = t(  # Ice Patch (cyan with bright white highlights)
+    'bbbbbbbbbbbbbbbb',
+    'bbbfbbbbbbbbbbbb',
+    'bbfffbbbbbbfbbbb',
+    'bbbfbbbbbbfffbbb',
+    'bbbbbbbbbbbfbbbb',
+    'bbbfbbbbbbbbbbbb',
+    'bfffbbbbbfbbbbfb',
+    'bbbfbbbbfffbbfff',
+    'bbbbbbbbbfbbbbfb',
+    'bbbbbbbbbbbbbbbb',
+    'bfbbbbbbbbbbbfbb',
+    'fffbbbbbbbbbfffb',
+    'bfbbbbbfbbbbbfbb',
+    'bbbbbbfffbbbbbbb',
+    'bbbbbbbfbbbbbbbb',
+    'bbbbbbbbbbbbbbbb',
+)
+
+TILES[52] = t(  # Pine Tree (deep green spire with brown trunk)
+    '2222222222222222',
+    '2222222a22222222',
+    '222222aaa2222222',
+    '2222222a22222222',
+    '222222aaa2222222',
+    '22222aaaaa222222',
+    '222222aaa2222222',
+    '22222aaaaa222222',
+    '2222aaaaaaa22222',
+    '22222aaaaa222222',
+    '2222aaaaaaa22222',
+    '22226aaaaa622222',
+    '2222226662222222',
+    '2222266666222222',
+    '2222226662222222',
+    '2222222222222222',
+)
+
+TILES[53] = t(  # Dead Tree (skeletal brown branches)
+    '2222222222222222',
+    '6222222226222222',
+    '262222222622222e',
+    '2622222226226662',
+    '2266222266622222',
+    '6622666666222222',
+    '2266662662222222',
+    '2266622666222222',
+    '2226222266222222',
+    '2222266662222222',
+    '2222266662222222',
+    '2222266662222222',
+    '2222266662222222',
+    '2222266662222222',
+    '2222266662222222',
+    '2222266662222222',
+)
+
+TILES[54] = t(  # Ash Ground (dark gray with darker flecks)
+    '8888888888888888',
+    '8808888888880888',
+    '8888888880888888',
+    '8888080888888888',
+    '8888888888880888',
+    '8088888008888880',
+    '8888888888888888',
+    '8888880888880888',
+    '8888888888888888',
+    '8088088888888008',
+    '8888888888888888',
+    '8888888080888888',
+    '8888888888880888',
+    '0888888888888880',
+    '8888080888888888',
+    '8888888888080888',
+)
+
+TILES[55] = t(  # Lava (bright red/yellow flow)
+    '4444444444444444',
+    '4cccc44ccc4444cc',
+    '4ccecc4cccc4ceec',
+    '44ceecc4ccc44cec',
+    '444ccc4ccc4444cc',
+    '44444444cc444444',
+    'cc4444444cc4444c',
+    'ccc4ee4444cc4ccc',
+    'cccceec4cc4ccccc',
+    'ccc4ec4cccc4ccc4',
+    '4cc444cccccc44c4',
+    '44cc44cccccc44c4',
+    '444cc44ccccc44c4',
+    '4444cc44cccc44cc',
+    '4444cc4444444ccc',
+    '44444444444444cc',
+)
+
+# ---- Row 7: biome detail 56..63 --------------------------------------------
+TILES[56] = t(  # Volcanic Rock (dark with red veins)
+    '8888888888888888',
+    '8808488888880888',
+    '8884cc488888c888',
+    '8884cc488884c488',
+    '8888c488884cc488',
+    '8888888888884888',
+    '8888888888888888',
+    '88888884c4888888',
+    '8c4888884cc88888',
+    '4cc4888884c48888',
+    '4cc488888848c888',
+    '88c48888884cc888',
+    '8888888888c48888',
+    '8888884c4888888c',
+    '88884cc4888884cc',
+    '88884c4488888cc4',
+)
+
+TILES[57] = t(  # Dense Forest (darker greener canopy)
+    '22a222a22a22a222',
+    '2aaa2aaa2aaa2aaa',
+    '22aa2aa222aaaaa2',
+    '2aaaaaa22aaa2aa2',
+    '2aa2aaaaaaaa2aa2',
+    '22aaaaa2aaaaaaa2',
+    '2aaa2aaaaaa2aaaa',
+    '2aaaaaaa2aaaaaa2',
+    'aaa2aaaaaaaaa2aa',
+    'aaaaaaa2aaa2aaa2',
+    '2aaa2aaaaaaaaa22',
+    'aaaaaaaaa2aaaaaa',
+    '22aaaa2aaaaa2aaa',
+    'aaa2aaaaaaaaaaaa',
+    'aaaaa2aaaa2aaaaa',
+    '2aaaaaaaaaaaaaaa',
+)
+
+TILES[58] = t(  # Snowy Pine (pine tree dusted with snow)
+    'ffffffffffffffff',
+    'fffffffafffffffe',
+    'ffffffafafffffff',
+    'fffffffffffffeff',
+    'ffffffafafffffff',
+    'fffffaaaaafffeff',
+    'ffffffafafffffff',
+    'fffffaafaafffeff',
+    'ffffaaffffaafefe',
+    'fffffafafafffeff',
+    'ffffaaaffffaffff',
+    'ffff6afffaa6ffff',
+    'ffffff666fffffff',
+    'fffff66666ffffff',
+    'ffffff666fffffff',
+    'ffffffffffffffff',
+)
+
+TILES[59] = t(  # Sand Dune (rolling sand mound)
+    'eeeeeeeeeeeeeeee',
+    'eeeeeeeeeeeeeeee',
+    'eeeeee6eeeeeeeee',
+    'eeee666666eeeeee',
+    'eee66666666eeeee',
+    'ee66eeeeee666eee',
+    'eee6eeeeeeee6eee',
+    'eeeee666eeeee6ee',
+    'eeee66e66eeeee6e',
+    'eee6eeee66eeeeee',
+    'ee6eeeeeee6eeeee',
+    'e66eeeeeeee666ee',
+    'eeeeeeeeeeeeeeee',
+    'eeeeeeeeeeeeeeee',
+    'eeeeeeeeeeeeeeee',
+    'eeeeeeeeeeeeeeee',
+)
+
+# Slots 60..63 reserved for future tiles
+for tid in range(60, 64):
     TILES[tid] = t(*(['................'] * 16))
 
 

@@ -8,6 +8,12 @@ namespace UltimaLikeRoguelike.Generation;
 /// Produces a random overworld map. Embeds transitions for towns and
 /// dungeons; their target map ids resolve to maps generated lazily by the
 /// other generators when first entered.
+/// <para/>
+/// The map is split into biome regions via a coarse Voronoi-style noise
+/// field. Each region picks a biome from <see cref="BiomeDatabase"/>, and
+/// the cell's elevation is then translated through that biome's tile
+/// atlas - so the same elevation can render as snow, grass, ash, or sand
+/// depending on which biome the cell falls into.
 /// </summary>
 public static class WorldGenerator
 {
@@ -16,6 +22,11 @@ public static class WorldGenerator
 
     private const int TownCount = 5;
     private const int DungeonCount = 3;
+
+    // Number of biome "cells" (Voronoi sites) sprinkled across the map.
+    // Each site claims its surrounding territory, producing irregular
+    // biome regions of roughly Width*Height / BiomeSiteCount tiles each.
+    private const int BiomeSiteCount = 9;
 
     public sealed record Result(
         MapData Map,
@@ -31,27 +42,37 @@ public static class WorldGenerator
         // 1. Generate elevation field via simple smoothed value noise.
         float[] elevation = GenerateElevation(rng);
 
-        // 2. Convert elevation to terrain tiles.
+        // 2. Generate a biome field: each cell points at a Biome.
+        Biome[] biomes = GenerateBiomeField(rng);
+
+        // 3. Convert (elevation, biome) -> terrain tile.
         for (int y = 0; y < Height; y++)
         {
             for (int x = 0; x < Width; x++)
             {
                 float e = elevation[y * Width + x];
-                int tile = ElevationToTile(e, rng);
+                Biome biome = biomes[y * Width + x];
+                int tile = BiomeTileForElevation(biome, e);
                 map.SetTile(x, y, tile);
             }
         }
 
-        // 3. Sprinkle a few decorative trees on grass.
-        for (int i = 0; i < 60; i++)
+        // 4. Sprinkle biome-appropriate decoration on Ground tiles.
+        for (int y = 0; y < Height; y++)
         {
-            int x = rng.Next(Width);
-            int y = rng.Next(Height);
-            if (map.GetTile(x, y) == TileId.Grass)
-                map.SetTile(x, y, TileId.Tree);
+            for (int x = 0; x < Width; x++)
+            {
+                Biome biome = biomes[y * Width + x];
+                if (map.GetTile(x, y) != biome.Ground) continue;
+                double r = rng.NextDouble();
+                if (r < biome.DecorChance)
+                    map.SetTile(x, y, biome.DecorTree);
+                else if (r < biome.DecorChance * 1.5f)
+                    map.SetTile(x, y, biome.DecorAlt);
+            }
         }
 
-        // 4. Place towns on grass, well-spaced.
+        // 5. Place towns on grass, well-spaced.
         var towns = new List<(int X, int Y, string MapId)>();
         var occupied = new List<(int X, int Y)>();
         for (int i = 0; i < TownCount; i++)
@@ -66,7 +87,7 @@ public static class WorldGenerator
             }
         }
 
-        // 5. Place dungeons in or near mountains.
+        // 6. Place dungeons in or near mountains.
         var dungeons = new List<(int X, int Y, string MapId)>();
         for (int i = 0; i < DungeonCount; i++)
         {
@@ -80,12 +101,11 @@ public static class WorldGenerator
             }
         }
 
-        // 6. Choose a player entry point: a passable grass tile near a town
-        //    if possible, otherwise any passable grass tile.
+        // 7. Choose a player entry point: a passable tile near a town if
+        //    possible, otherwise any passable tile.
         if (towns.Count > 0)
         {
             var (tx, ty, _) = towns[0];
-            // Stand one tile south of the first town for visibility.
             int ex = tx, ey = Math.Min(Height - 1, ty + 1);
             if (TileDatabase.IsPassable(map.GetTile(ex, ey)))
             {
@@ -187,19 +207,70 @@ public static class WorldGenerator
         return dst;
     }
 
-    private static int ElevationToTile(float e, Random rng)
+    /// <summary>
+    /// Builds a per-cell biome assignment using a Voronoi-style scattering
+    /// of biome "sites." Each site picks a random biome name; every cell
+    /// is assigned to its closest site. This produces large irregular
+    /// biome regions with sharp borders, which look nicer than smoothed
+    /// noise (where biomes blend into mush).
+    /// </summary>
+    private static Biome[] GenerateBiomeField(Random rng)
+    {
+        var biomeNames = new List<string>(BiomeDatabase.Names);
+
+        // Scatter sites with random biome assignments. Force the first
+        // site to be Plains so there is always grass somewhere - towns
+        // are placed on grass, and the player spawns near a town.
+        var sites = new (int X, int Y, Biome Biome)[BiomeSiteCount];
+        for (int i = 0; i < BiomeSiteCount; i++)
+        {
+            int sx = rng.Next(Width);
+            int sy = rng.Next(Height);
+            string name = i == 0
+                ? BiomeDatabase.Plains
+                : biomeNames[rng.Next(biomeNames.Count)];
+            sites[i] = (sx, sy, BiomeDatabase.Get(name));
+        }
+
+        var field = new Biome[Width * Height];
+        for (int y = 0; y < Height; y++)
+        {
+            for (int x = 0; x < Width; x++)
+            {
+                int best = 0;
+                int bestDist = int.MaxValue;
+                for (int i = 0; i < sites.Length; i++)
+                {
+                    int dx = sites[i].X - x;
+                    int dy = sites[i].Y - y;
+                    int d = dx * dx + dy * dy;
+                    if (d < bestDist)
+                    {
+                        bestDist = d;
+                        best = i;
+                    }
+                }
+                field[y * Width + x] = sites[best].Biome;
+            }
+        }
+        return field;
+    }
+
+    /// <summary>
+    /// Translate elevation through a biome's tile atlas. Water is
+    /// universal (every biome has shores). Above the waterline the biome
+    /// supplies its own coast / ground / vegetation / highland / peak
+    /// tiles.
+    /// </summary>
+    private static int BiomeTileForElevation(Biome biome, float e)
     {
         if (e < 0.20f) return TileId.DeepWater;
         if (e < 0.30f) return TileId.ShallowWater;
-        if (e < 0.34f) return TileId.Sand;
-        if (e < 0.55f)
-        {
-            // mostly grass with a chance of swamp in low areas
-            return e < 0.40f && rng.NextDouble() < 0.10 ? TileId.Swamp : TileId.Grass;
-        }
-        if (e < 0.70f) return TileId.Forest;
-        if (e < 0.82f) return TileId.Hills;
-        return TileId.Mountains;
+        if (e < 0.34f) return biome.Coast;
+        if (e < 0.55f) return biome.Ground;
+        if (e < 0.70f) return biome.Vegetation;
+        if (e < 0.82f) return biome.Highland;
+        return biome.Peak;
     }
 
     private static bool IsGoodTownSpot(MapData map, int x, int y)
@@ -208,7 +279,11 @@ public static class WorldGenerator
     private static bool IsGoodDungeonSpot(MapData map, int x, int y)
     {
         int t = map.GetTile(x, y);
-        if (t != TileId.Hills && t != TileId.Mountains) return false;
+        bool rocky = t == TileId.Hills
+                  || t == TileId.Mountains
+                  || t == TileId.IcePatch
+                  || t == TileId.VolcanicRock;
+        if (!rocky) return false;
         // Also require at least one passable neighbor so the player can
         // actually step onto the dungeon tile from the world map.
         for (int dy = -1; dy <= 1; dy++)

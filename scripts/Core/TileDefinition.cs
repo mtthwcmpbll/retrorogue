@@ -75,6 +75,22 @@ public static class TileDatabase
         Add(Def(TileId.Counter,      "counter",       passable: false));
         Add(Def(TileId.Chest,        "chest",         passable: false));
         Add(Def(TileId.Barrel,       "barrel",        passable: false));
+
+        // Row 6 - biome terrain
+        Add(Def(TileId.DesertSand,   "desert sand",   passable: true));
+        Add(Def(TileId.Cactus,       "cactus",        passable: false));
+        Add(Def(TileId.SnowGround,   "snow",          passable: true));
+        Add(Def(TileId.IcePatch,     "ice",           passable: true));
+        Add(Def(TileId.PineTree,     "pine",          passable: false));
+        Add(Def(TileId.DeadTree,     "dead tree",     passable: false));
+        Add(Def(TileId.AshGround,    "ash",           passable: true));
+        Add(Def(TileId.Lava,         "lava",          passable: false));
+
+        // Row 7 - biome detail
+        Add(Def(TileId.VolcanicRock, "volcanic rock", passable: false));
+        Add(Def(TileId.DenseForest,  "dense forest",  passable: true));
+        Add(Def(TileId.SnowyPine,    "snowy pine",    passable: false));
+        Add(Def(TileId.SandDune,     "sand dune",     passable: true));
     }
 
     private static void Add(TileDefinition def) => _defs[def.Id] = def;
