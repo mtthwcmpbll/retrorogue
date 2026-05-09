@@ -5,9 +5,12 @@ using UltimaLikeRoguelike.Core;
 namespace UltimaLikeRoguelike.Generation;
 
 /// <summary>
-/// Generates a town map: 32x32 grass, 4-7 rectangular buildings each with
-/// a door, a perimeter fence with a southern gate that exits to the world,
-/// and decorative trees / wells / signposts.
+/// Generates a town map: 32x32 of the host biome's ground, 4-7
+/// rectangular buildings each with a door, a perimeter fence with a
+/// southern gate that exits to the world, and decorative trees / wells
+/// / signposts. The host <see cref="Biome"/> supplies every tile that
+/// makes the town feel "of that biome": ground, walls, windows, doors,
+/// floors, and the trees/bushes scattered between buildings.
 /// </summary>
 public static class TownGenerator
 {
@@ -19,13 +22,14 @@ public static class TownGenerator
 
     public sealed record Result(MapData Map, IReadOnlyList<Building> Buildings);
 
-    public static Result Generate(string mapId, int seed)
+    public static Result Generate(string mapId, int seed, string biomeName)
     {
         var rng = new Random(seed);
+        var biome = BiomeDatabase.Get(biomeName);
         var map = new MapData(mapId, MapKind.Town, Width, Height, PaletteDatabase.Town);
 
-        // 1. Fill with grass.
-        map.Fill(0, 0, Width - 1, Height - 1, TileId.Grass);
+        // 1. Fill with the biome's ground tile.
+        map.Fill(0, 0, Width - 1, Height - 1, biome.Ground);
 
         // 2. Perimeter fence with a southern gate.
         for (int x = 0; x < Width; x++)
@@ -66,14 +70,14 @@ public static class TownGenerator
                 int by = rng.Next(3, Height - bh - 3);
                 var r = (bx, by, bx + bw - 1, by + bh - 1);
                 if (Overlaps(occupiedRects, r, padding: 1)) continue;
-                PlaceBuilding(map, rng, bx, by, bw, bh, buildings);
+                PlaceBuilding(map, biome, rng, bx, by, bw, bh, buildings);
                 occupiedRects.Add(r);
                 break;
             }
         }
 
-        // 5. Light decoration.
-        SprinkleDecor(map, rng);
+        // 5. Light decoration (biome-themed trees/bushes).
+        SprinkleDecor(map, biome, rng);
 
         // 6. Wire each building's door to its interior id and seed.
         for (int i = 0; i < buildings.Count; i++)
@@ -97,43 +101,37 @@ public static class TownGenerator
     }
 
     private static void PlaceBuilding(
-        MapData map, Random rng,
+        MapData map, Biome biome, Random rng,
         int x, int y, int w, int h,
         List<Building> buildings)
     {
         int x1 = x + w - 1;
         int y1 = y + h - 1;
 
-        // Floor: brick or wood, randomly chosen per building.
-        int floor = rng.NextDouble() < 0.5 ? TileId.WoodFloor : TileId.BrickFloor;
-        map.Fill(x + 1, y + 1, x1 - 1, y1 - 1, floor);
+        // Floor and walls come straight from the biome's town tileset
+        // - no per-building variation here; the variation is across
+        // biomes, not across buildings within a town.
+        map.Fill(x + 1, y + 1, x1 - 1, y1 - 1, biome.TownFloor);
+        map.Rect(x, y, x1, y1, biome.TownWall);
 
-        // Walls: stone, wood, or brick (matching style is pleasing).
-        int wallTile;
-        if (floor == TileId.WoodFloor)
-            wallTile = rng.NextDouble() < 0.5 ? TileId.WoodWall : TileId.StoneWall;
-        else
-            wallTile = rng.NextDouble() < 0.5 ? TileId.BrickWall : TileId.StoneWall;
-        map.Rect(x, y, x1, y1, wallTile);
-
-        // Add a window or two on north and south walls.
+        // Add a window or two on the north wall.
         if (w >= 6)
         {
-            map.SetTile(x + w / 2 - 1, y, TileId.WindowWall);
-            map.SetTile(x + w / 2 + 1, y, TileId.WindowWall);
+            map.SetTile(x + w / 2 - 1, y, biome.TownWindowWall);
+            map.SetTile(x + w / 2 + 1, y, biome.TownWindowWall);
         }
         else
         {
-            map.SetTile(x + w / 2, y, TileId.WindowWall);
+            map.SetTile(x + w / 2, y, biome.TownWindowWall);
         }
 
         // Door on the south wall, near centre. Will become a transition.
         int doorX = x + w / 2;
         int doorY = y1;
-        map.SetTile(doorX, doorY, TileId.DoorClosed);
+        map.SetTile(doorX, doorY, biome.TownDoorClosed);
 
         // Connect the door to the main path via a short stub.
-        // Walk south from the door until we hit anything non-grass.
+        // Walk south from the door until we hit the main path.
         for (int yy = doorY + 1; yy < map.Height - 1; yy++)
         {
             int t = map.GetTile(doorX, yy);
@@ -150,7 +148,7 @@ public static class TownGenerator
             while (xx != gateX)
             {
                 xx += step;
-                if (map.GetTile(xx, connectorY) == TileId.Grass)
+                if (map.GetTile(xx, connectorY) == biome.Ground)
                     map.SetTile(xx, connectorY, TileId.Path);
             }
         }
@@ -158,16 +156,16 @@ public static class TownGenerator
         buildings.Add(new Building(doorX, doorY, InteriorMapId: "", Seed: rng.Next()));
     }
 
-    private static void SprinkleDecor(MapData map, Random rng)
+    private static void SprinkleDecor(MapData map, Biome biome, Random rng)
     {
         for (int i = 0; i < 25; i++)
         {
             int x = rng.Next(1, map.Width - 1);
             int y = rng.Next(1, map.Height - 1);
-            if (map.GetTile(x, y) != TileId.Grass) continue;
+            if (map.GetTile(x, y) != biome.Ground) continue;
             double r = rng.NextDouble();
-            if (r < 0.5) map.SetTile(x, y, TileId.Tree);
-            else if (r < 0.8) map.SetTile(x, y, TileId.Bush);
+            if (r < 0.5) map.SetTile(x, y, biome.Tree);
+            else if (r < 0.8) map.SetTile(x, y, biome.Bush);
             else if (r < 0.92) map.SetTile(x, y, TileId.Well);
             else map.SetTile(x, y, TileId.Signpost);
         }
