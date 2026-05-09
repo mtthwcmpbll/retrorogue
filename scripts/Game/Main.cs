@@ -54,10 +54,10 @@ public partial class Main : Node2D
 		_maps[world.Map.Id] = world.Map;
 
 		// Towns
-		foreach (var (wx, wy, mapId) in world.Towns)
+		foreach (var (wx, wy, mapId, biomeName) in world.Towns)
 		{
 			int townSeed = unchecked(seed + mapId.GetHashCode());
-			var townResult = TownGenerator.Generate(mapId, townSeed);
+			var townResult = TownGenerator.Generate(mapId, townSeed, biomeName);
 			var townMap = townResult.Map;
 			townMap.ParentMapId = "world";
 			townMap.ParentX = wx;
@@ -74,11 +74,12 @@ public partial class Main : Node2D
 
 			_maps[mapId] = townMap;
 
-			// Interiors for each building.
+			// Interiors for each building, themed to the same biome as
+			// the town that contains them.
 			foreach (var building in townResult.Buildings)
 			{
 				int interiorSeed = unchecked(townSeed + building.InteriorMapId.GetHashCode());
-				var interior = InteriorGenerator.Generate(building.InteriorMapId, interiorSeed);
+				var interior = InteriorGenerator.Generate(building.InteriorMapId, interiorSeed, biomeName);
 				interior.ParentMapId = mapId;
 				interior.ParentX = building.DoorX;
 				interior.ParentY = building.DoorY;
@@ -96,7 +97,7 @@ public partial class Main : Node2D
 		}
 
 		// Dungeons
-		foreach (var (wx, wy, mapId) in world.Dungeons)
+		foreach (var (wx, wy, mapId, _) in world.Dungeons)
 		{
 			int dSeed = unchecked(seed + mapId.GetHashCode());
 			var dmap = DungeonGenerator.Generate(mapId, dSeed);

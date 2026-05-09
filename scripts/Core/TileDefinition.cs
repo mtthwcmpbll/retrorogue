@@ -149,6 +149,38 @@ public static class TileDatabase
         Add(Def(TileId.MountainsTree,       "alpine pine",   passable: false));
         Add(Def(TileId.MountainsBush,       "alpine shrub",  passable: false));
         Add(Def(TileId.MountainsRock,       "boulder",       passable: false));
+
+        // Per-biome town tilesets. Floors are passable, walls/windows
+        // block movement, doors are passable transitions, beds/tables/
+        // chairs block movement. Order matches TileId rows 13..19.
+
+        AddTownSet(TileId.PlainsTownFloor);
+        AddTownSet(TileId.DesertTownFloor);
+        AddTownSet(TileId.ForestTownFloor);
+        AddTownSet(TileId.DeepForestTownFloor);
+        AddTownSet(TileId.TundraTownFloor);
+        AddTownSet(TileId.VolcanicTownFloor);
+        AddTownSet(TileId.MountainsTownFloor);
+    }
+
+    /// <summary>
+    /// Register a biome's 8-tile town set in the canonical order
+    /// starting at <paramref name="floorId"/>: Floor, Wall, WindowWall,
+    /// DoorClosed, DoorOpen, Bed, Table, Chair.
+    /// </summary>
+    private static void AddTownSet(int floorId)
+    {
+        TileDefinition Def(int id, string name, bool passable, bool isTransition = false)
+            => new(id, name, passable, isTransition);
+
+        Add(Def(floorId + 0, "floor",       passable: true));
+        Add(Def(floorId + 1, "wall",        passable: false));
+        Add(Def(floorId + 2, "window wall", passable: false));
+        Add(Def(floorId + 3, "door",        passable: true,  isTransition: true));
+        Add(Def(floorId + 4, "open door",   passable: true,  isTransition: true));
+        Add(Def(floorId + 5, "bed",         passable: false));
+        Add(Def(floorId + 6, "table",       passable: false));
+        Add(Def(floorId + 7, "chair",       passable: false));
     }
 
     private static void Add(TileDefinition def) => _defs[def.Id] = def;

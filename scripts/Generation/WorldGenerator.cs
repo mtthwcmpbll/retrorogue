@@ -33,8 +33,8 @@ public static class WorldGenerator
 
     public sealed record Result(
         MapData Map,
-        IReadOnlyList<(int X, int Y, string MapId)> Towns,
-        IReadOnlyList<(int X, int Y, string MapId)> Dungeons
+        IReadOnlyList<(int X, int Y, string MapId, string BiomeName)> Towns,
+        IReadOnlyList<(int X, int Y, string MapId, string BiomeName)> Dungeons
     );
 
     public static Result Generate(int seed)
@@ -78,31 +78,37 @@ public static class WorldGenerator
             }
         }
 
-        // 5. Place towns on grass, well-spaced.
-        var towns = new List<(int X, int Y, string MapId)>();
+        // 5. Place towns on biome ground, well-spaced. The biome of the
+        //    cell becomes the town's biome, so the town generator can
+        //    paint walls/floors/furniture in that biome's style.
+        var towns = new List<(int X, int Y, string MapId, string BiomeName)>();
         var occupied = new List<(int X, int Y)>();
         for (int i = 0; i < TownCount; i++)
         {
             if (TryFindSpot(map, rng, occupied, IsGoodTownSpot, minDistance: 10, out int tx, out int ty))
             {
                 string mapId = $"town:{i}";
+                string biomeName = biomes[ty * Width + tx].Name;
                 map.SetTile(tx, ty, TileId.Town);
                 map.Transitions[(tx, ty)] = new MapTransition(mapId);
-                towns.Add((tx, ty, mapId));
+                towns.Add((tx, ty, mapId, biomeName));
                 occupied.Add((tx, ty));
             }
         }
 
-        // 6. Place dungeons in or near elevated rocky terrain.
-        var dungeons = new List<(int X, int Y, string MapId)>();
+        // 6. Place dungeons in or near elevated rocky terrain. The
+        //    dungeon's host biome is recorded for symmetry with towns;
+        //    the dungeon generator may use it for theming in the future.
+        var dungeons = new List<(int X, int Y, string MapId, string BiomeName)>();
         for (int i = 0; i < DungeonCount; i++)
         {
             if (TryFindSpot(map, rng, occupied, IsGoodDungeonSpot, minDistance: 8, out int dx, out int dy))
             {
                 string mapId = $"dungeon:{i}";
+                string biomeName = biomes[dy * Width + dx].Name;
                 map.SetTile(dx, dy, TileId.Dungeon);
                 map.Transitions[(dx, dy)] = new MapTransition(mapId);
-                dungeons.Add((dx, dy, mapId));
+                dungeons.Add((dx, dy, mapId, biomeName));
                 occupied.Add((dx, dy));
             }
         }

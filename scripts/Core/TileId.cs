@@ -141,4 +141,79 @@ public static class TileId
     public const int MountainsTree         = 101;
     public const int MountainsBush         = 102;
     public const int MountainsRock         = 103;
+
+    // Rows 13..19 - per-biome town tilesets. Each biome gets one row of
+    // 8 town tiles in this fixed order: Floor, Wall, WindowWall,
+    // DoorClosed, DoorOpen, Bed, Table, Chair. So tile id of biome B's
+    // town role R is 104 + 8*B + R.
+
+    // Row 13 - Plains town
+    public const int PlainsTownFloor       = 104;
+    public const int PlainsTownWall        = 105;
+    public const int PlainsTownWindowWall  = 106;
+    public const int PlainsTownDoorClosed  = 107;
+    public const int PlainsTownDoorOpen    = 108;
+    public const int PlainsTownBed         = 109;
+    public const int PlainsTownTable       = 110;
+    public const int PlainsTownChair       = 111;
+
+    // Row 14 - Desert town
+    public const int DesertTownFloor       = 112;
+    public const int DesertTownWall        = 113;
+    public const int DesertTownWindowWall  = 114;
+    public const int DesertTownDoorClosed  = 115;
+    public const int DesertTownDoorOpen    = 116;
+    public const int DesertTownBed         = 117;
+    public const int DesertTownTable       = 118;
+    public const int DesertTownChair       = 119;
+
+    // Row 15 - Forest town
+    public const int ForestTownFloor       = 120;
+    public const int ForestTownWall        = 121;
+    public const int ForestTownWindowWall  = 122;
+    public const int ForestTownDoorClosed  = 123;
+    public const int ForestTownDoorOpen    = 124;
+    public const int ForestTownBed         = 125;
+    public const int ForestTownTable       = 126;
+    public const int ForestTownChair       = 127;
+
+    // Row 16 - Deep Forest town
+    public const int DeepForestTownFloor       = 128;
+    public const int DeepForestTownWall        = 129;
+    public const int DeepForestTownWindowWall  = 130;
+    public const int DeepForestTownDoorClosed  = 131;
+    public const int DeepForestTownDoorOpen    = 132;
+    public const int DeepForestTownBed         = 133;
+    public const int DeepForestTownTable       = 134;
+    public const int DeepForestTownChair       = 135;
+
+    // Row 17 - Icy Tundra town
+    public const int TundraTownFloor       = 136;
+    public const int TundraTownWall        = 137;
+    public const int TundraTownWindowWall  = 138;
+    public const int TundraTownDoorClosed  = 139;
+    public const int TundraTownDoorOpen    = 140;
+    public const int TundraTownBed         = 141;
+    public const int TundraTownTable       = 142;
+    public const int TundraTownChair       = 143;
+
+    // Row 18 - Volcanic town
+    public const int VolcanicTownFloor       = 144;
+    public const int VolcanicTownWall        = 145;
+    public const int VolcanicTownWindowWall  = 146;
+    public const int VolcanicTownDoorClosed  = 147;
+    public const int VolcanicTownDoorOpen    = 148;
+    public const int VolcanicTownBed         = 149;
+    public const int VolcanicTownTable       = 150;
+    public const int VolcanicTownChair       = 151;
+
+    // Row 19 - Mountains town
+    public const int MountainsTownFloor       = 152;
+    public const int MountainsTownWall        = 153;
+    public const int MountainsTownWindowWall  = 154;
+    public const int MountainsTownDoorClosed  = 155;
+    public const int MountainsTownDoorOpen    = 156;
+    public const int MountainsTownBed         = 157;
+    public const int MountainsTownTable       = 158;
+    public const int MountainsTownChair       = 159;
 }
