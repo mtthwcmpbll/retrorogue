@@ -1,24 +1,26 @@
 namespace UltimaLikeRoguelike.Core;
 
 /// <summary>
-/// A biome's "tile atlas": a mapping from logical terrain roles (coast,
-/// ground, vegetation, highland, peak) to specific tile ids. The world
-/// generator picks a biome per cell and then translates the cell's
-/// elevation into one of these slots, so the same elevation noise can
-/// produce snow, ash, sand, or grass depending on the local biome.
+/// A biome's complete tileset: the world generator picks a biome per cell
+/// and asks it for the right tile id given the cell's elevation band
+/// (Coast / Ground / Vegetation / Hill / Peak) plus probabilistic
+/// decoration tiles (Tree / Bush / Rock) sprinkled on top of the Ground.
 /// <para/>
-/// <see cref="DecorTree"/> and <see cref="DecorAlt"/> are sprinkled on top
-/// of <see cref="Ground"/> tiles to add visual variety: e.g. cacti on
-/// desert sand, pines in deep forest, bare rocks in volcanic flats.
+/// Each biome owns a contiguous row in the atlas, so swapping biomes
+/// gives every tile (ground, trees, rocks, hills, peaks) a distinct
+/// look.
 /// </summary>
 public sealed record Biome(
     string Name,
     int Coast,
     int Ground,
     int Vegetation,
-    int Highland,
+    int Hill,
     int Peak,
-    int DecorTree,
-    int DecorAlt,
-    float DecorChance
+    int Tree,
+    int Bush,
+    int Rock,
+    float TreeChance,
+    float BushChance,
+    float RockChance
 );

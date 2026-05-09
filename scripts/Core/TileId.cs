@@ -66,19 +66,79 @@ public static class TileId
     public const int Guard          = 46;
     public const int Innkeeper      = 47;
 
-    // Row 6 - biome terrain
-    public const int DesertSand     = 48;
-    public const int Cactus         = 49;
-    public const int SnowGround     = 50;
-    public const int IcePatch       = 51;
-    public const int PineTree       = 52;
-    public const int DeadTree       = 53;
-    public const int AshGround      = 54;
-    public const int Lava           = 55;
+    // Rows 6..12 - per-biome tilesets. Each biome gets one row of 8
+    // tiles in this fixed order: Coast, Ground, Vegetation, Hill, Peak,
+    // Tree, Bush, Rock. So tile id of biome B's role R is
+    // 48 + 8*B + R for B in 0..6 and R in 0..7. The constants below are
+    // the same indices spelled out for readability.
 
-    // Row 7 - biome detail
-    public const int VolcanicRock   = 56;
-    public const int DenseForest    = 57;
-    public const int SnowyPine      = 58;
-    public const int SandDune       = 59;
+    // Row 6 - Plains biome
+    public const int PlainsCoast        = 48;
+    public const int PlainsGround       = 49;
+    public const int PlainsVegetation   = 50;
+    public const int PlainsHill         = 51;
+    public const int PlainsPeak         = 52;
+    public const int PlainsTree         = 53;
+    public const int PlainsBush         = 54;
+    public const int PlainsRock         = 55;
+
+    // Row 7 - Desert biome
+    public const int DesertCoast        = 56;
+    public const int DesertGround       = 57;
+    public const int DesertVegetation   = 58;
+    public const int DesertHill         = 59;
+    public const int DesertPeak         = 60;
+    public const int DesertTree         = 61;
+    public const int DesertBush         = 62;
+    public const int DesertRock         = 63;
+
+    // Row 8 - Forest biome
+    public const int ForestCoast        = 64;
+    public const int ForestGround       = 65;
+    public const int ForestVegetation   = 66;
+    public const int ForestHill         = 67;
+    public const int ForestPeak         = 68;
+    public const int ForestTree         = 69;
+    public const int ForestBush         = 70;
+    public const int ForestRock         = 71;
+
+    // Row 9 - Deep Forest biome
+    public const int DeepForestCoast        = 72;
+    public const int DeepForestGround       = 73;
+    public const int DeepForestVegetation   = 74;
+    public const int DeepForestHill         = 75;
+    public const int DeepForestPeak         = 76;
+    public const int DeepForestTree         = 77;
+    public const int DeepForestBush         = 78;
+    public const int DeepForestRock         = 79;
+
+    // Row 10 - Icy Tundra biome
+    public const int TundraCoast        = 80;
+    public const int TundraGround       = 81;
+    public const int TundraVegetation   = 82;
+    public const int TundraHill         = 83;
+    public const int TundraPeak         = 84;
+    public const int TundraTree         = 85;
+    public const int TundraBush         = 86;
+    public const int TundraRock         = 87;
+
+    // Row 11 - Volcanic biome
+    public const int VolcanicCoast      = 88;
+    public const int VolcanicGround     = 89;
+    public const int VolcanicVegetation = 90;
+    public const int VolcanicHill       = 91;
+    public const int VolcanicPeak       = 92;
+    public const int VolcanicTree       = 93;
+    public const int VolcanicBush       = 94;
+    public const int VolcanicRock       = 95;
+
+    // Row 12 - Mountains biome
+    public const int MountainsCoast        = 96;
+    public const int MountainsGround       = 97;
+    public const int MountainsVegetation   = 98;
+    public const int MountainsHill         = 99;
+    public const int MountainsPeak         = 100;
+    public const int MountainsTree         = 101;
+    public const int MountainsBush         = 102;
+    public const int MountainsRock         = 103;
 }

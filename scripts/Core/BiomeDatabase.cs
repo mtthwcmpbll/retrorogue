@@ -3,11 +3,10 @@ using System.Collections.Generic;
 namespace UltimaLikeRoguelike.Core;
 
 /// <summary>
-/// Registry of named biomes used by the world generator. Each biome maps
-/// the elevation bands (coast/ground/vegetation/highland/peak) to specific
-/// tile ids, so a single elevation field can render as desert, tundra,
-/// volcanic, or temperate terrain depending on which biome region the
-/// cell falls into.
+/// Registry of named biomes used by the world generator. Each biome
+/// brings its own tileset (coast, ground, vegetation, hill, peak, tree,
+/// bush, rock), so a region's biome determines what every tile in that
+/// region looks like.
 /// </summary>
 public static class BiomeDatabase
 {
@@ -25,86 +24,107 @@ public static class BiomeDatabase
     {
         Add(new Biome(
             Name:         Plains,
-            Coast:        TileId.Sand,
-            Ground:       TileId.Grass,
-            Vegetation:   TileId.Forest,
-            Highland:     TileId.Hills,
-            Peak:         TileId.Mountains,
-            DecorTree:    TileId.Tree,
-            DecorAlt:     TileId.Bush,
-            DecorChance:  0.04f
+            Coast:        TileId.PlainsCoast,
+            Ground:       TileId.PlainsGround,
+            Vegetation:   TileId.PlainsVegetation,
+            Hill:         TileId.PlainsHill,
+            Peak:         TileId.PlainsPeak,
+            Tree:         TileId.PlainsTree,
+            Bush:         TileId.PlainsBush,
+            Rock:         TileId.PlainsRock,
+            TreeChance:   0.04f,
+            BushChance:   0.03f,
+            RockChance:   0.01f
         ));
 
         Add(new Biome(
             Name:         Desert,
-            Coast:        TileId.Sand,
-            Ground:       TileId.DesertSand,
-            Vegetation:   TileId.SandDune,
-            Highland:     TileId.Hills,
-            Peak:         TileId.Mountains,
-            DecorTree:    TileId.Cactus,
-            DecorAlt:     TileId.Rock,
-            DecorChance:  0.06f
+            Coast:        TileId.DesertCoast,
+            Ground:       TileId.DesertGround,
+            Vegetation:   TileId.DesertVegetation,
+            Hill:         TileId.DesertHill,
+            Peak:         TileId.DesertPeak,
+            Tree:         TileId.DesertTree,
+            Bush:         TileId.DesertBush,
+            Rock:         TileId.DesertRock,
+            TreeChance:   0.04f,
+            BushChance:   0.03f,
+            RockChance:   0.04f
         ));
 
         Add(new Biome(
             Name:         Forest,
-            Coast:        TileId.Sand,
-            Ground:       TileId.Grass,
-            Vegetation:   TileId.Forest,
-            Highland:     TileId.Forest,
-            Peak:         TileId.Mountains,
-            DecorTree:    TileId.Tree,
-            DecorAlt:     TileId.Bush,
-            DecorChance:  0.18f
+            Coast:        TileId.ForestCoast,
+            Ground:       TileId.ForestGround,
+            Vegetation:   TileId.ForestVegetation,
+            Hill:         TileId.ForestHill,
+            Peak:         TileId.ForestPeak,
+            Tree:         TileId.ForestTree,
+            Bush:         TileId.ForestBush,
+            Rock:         TileId.ForestRock,
+            TreeChance:   0.18f,
+            BushChance:   0.06f,
+            RockChance:   0.02f
         ));
 
         Add(new Biome(
             Name:         DeepForest,
-            Coast:        TileId.Grass,
-            Ground:       TileId.Forest,
-            Vegetation:   TileId.DenseForest,
-            Highland:     TileId.DenseForest,
-            Peak:         TileId.Mountains,
-            DecorTree:    TileId.PineTree,
-            DecorAlt:     TileId.Tree,
-            DecorChance:  0.30f
+            Coast:        TileId.DeepForestCoast,
+            Ground:       TileId.DeepForestGround,
+            Vegetation:   TileId.DeepForestVegetation,
+            Hill:         TileId.DeepForestHill,
+            Peak:         TileId.DeepForestPeak,
+            Tree:         TileId.DeepForestTree,
+            Bush:         TileId.DeepForestBush,
+            Rock:         TileId.DeepForestRock,
+            TreeChance:   0.32f,
+            BushChance:   0.08f,
+            RockChance:   0.02f
         ));
 
         Add(new Biome(
             Name:         IcyTundra,
-            Coast:        TileId.SnowGround,
-            Ground:       TileId.SnowGround,
-            Vegetation:   TileId.SnowGround,
-            Highland:     TileId.IcePatch,
-            Peak:         TileId.Mountains,
-            DecorTree:    TileId.SnowyPine,
-            DecorAlt:     TileId.IcePatch,
-            DecorChance:  0.07f
+            Coast:        TileId.TundraCoast,
+            Ground:       TileId.TundraGround,
+            Vegetation:   TileId.TundraVegetation,
+            Hill:         TileId.TundraHill,
+            Peak:         TileId.TundraPeak,
+            Tree:         TileId.TundraTree,
+            Bush:         TileId.TundraBush,
+            Rock:         TileId.TundraRock,
+            TreeChance:   0.05f,
+            BushChance:   0.02f,
+            RockChance:   0.03f
         ));
 
         Add(new Biome(
             Name:         Volcanic,
-            Coast:        TileId.AshGround,
-            Ground:       TileId.AshGround,
-            Vegetation:   TileId.VolcanicRock,
-            Highland:     TileId.VolcanicRock,
-            Peak:         TileId.Lava,
-            DecorTree:    TileId.DeadTree,
-            DecorAlt:     TileId.Rock,
-            DecorChance:  0.10f
+            Coast:        TileId.VolcanicCoast,
+            Ground:       TileId.VolcanicGround,
+            Vegetation:   TileId.VolcanicVegetation,
+            Hill:         TileId.VolcanicHill,
+            Peak:         TileId.VolcanicPeak,
+            Tree:         TileId.VolcanicTree,
+            Bush:         TileId.VolcanicBush,
+            Rock:         TileId.VolcanicRock,
+            TreeChance:   0.06f,
+            BushChance:   0.04f,
+            RockChance:   0.06f
         ));
 
         Add(new Biome(
             Name:         Mountains,
-            Coast:        TileId.Sand,
-            Ground:       TileId.Hills,
-            Vegetation:   TileId.Hills,
-            Highland:     TileId.Mountains,
-            Peak:         TileId.Mountains,
-            DecorTree:    TileId.Rock,
-            DecorAlt:     TileId.Tree,
-            DecorChance:  0.08f
+            Coast:        TileId.MountainsCoast,
+            Ground:       TileId.MountainsGround,
+            Vegetation:   TileId.MountainsVegetation,
+            Hill:         TileId.MountainsHill,
+            Peak:         TileId.MountainsPeak,
+            Tree:         TileId.MountainsTree,
+            Bush:         TileId.MountainsBush,
+            Rock:         TileId.MountainsRock,
+            TreeChance:   0.05f,
+            BushChance:   0.04f,
+            RockChance:   0.08f
         ));
     }
 

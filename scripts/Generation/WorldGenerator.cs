@@ -9,11 +9,14 @@ namespace UltimaLikeRoguelike.Generation;
 /// dungeons; their target map ids resolve to maps generated lazily by the
 /// other generators when first entered.
 /// <para/>
-/// The map is split into biome regions via a coarse Voronoi-style noise
-/// field. Each region picks a biome from <see cref="BiomeDatabase"/>, and
-/// the cell's elevation is then translated through that biome's tile
-/// atlas - so the same elevation can render as snow, grass, ash, or sand
-/// depending on which biome the cell falls into.
+/// The map is split into biome regions via Voronoi-style scattering, and
+/// the borders between regions are softened by per-cell probabilistic
+/// blending: cells near a boundary occasionally pick the runner-up
+/// biome's tile, so a forest fades into plains instead of stopping at a
+/// hard edge. Each cell's elevation is then translated through the
+/// chosen biome's tileset (Coast/Ground/Vegetation/Hill/Peak), and
+/// Ground tiles get sprinkled with biome-appropriate trees, bushes, and
+/// rocks.
 /// </summary>
 public static class WorldGenerator
 {
@@ -42,7 +45,8 @@ public static class WorldGenerator
         // 1. Generate elevation field via simple smoothed value noise.
         float[] elevation = GenerateElevation(rng);
 
-        // 2. Generate a biome field: each cell points at a Biome.
+        // 2. Generate a biome field: each cell points at a Biome (with
+        //    blended borders so transitions feather instead of cutting).
         Biome[] biomes = GenerateBiomeField(rng);
 
         // 3. Convert (elevation, biome) -> terrain tile.
@@ -65,10 +69,12 @@ public static class WorldGenerator
                 Biome biome = biomes[y * Width + x];
                 if (map.GetTile(x, y) != biome.Ground) continue;
                 double r = rng.NextDouble();
-                if (r < biome.DecorChance)
-                    map.SetTile(x, y, biome.DecorTree);
-                else if (r < biome.DecorChance * 1.5f)
-                    map.SetTile(x, y, biome.DecorAlt);
+                float treeT = biome.TreeChance;
+                float bushT = treeT + biome.BushChance;
+                float rockT = bushT + biome.RockChance;
+                if (r < treeT) map.SetTile(x, y, biome.Tree);
+                else if (r < bushT) map.SetTile(x, y, biome.Bush);
+                else if (r < rockT) map.SetTile(x, y, biome.Rock);
             }
         }
 
@@ -87,7 +93,7 @@ public static class WorldGenerator
             }
         }
 
-        // 6. Place dungeons in or near mountains.
+        // 6. Place dungeons in or near elevated rocky terrain.
         var dungeons = new List<(int X, int Y, string MapId)>();
         for (int i = 0; i < DungeonCount; i++)
         {
@@ -208,19 +214,21 @@ public static class WorldGenerator
     }
 
     /// <summary>
-    /// Builds a per-cell biome assignment using a Voronoi-style scattering
-    /// of biome "sites." Each site picks a random biome name; every cell
-    /// is assigned to its closest site. This produces large irregular
-    /// biome regions with sharp borders, which look nicer than smoothed
-    /// noise (where biomes blend into mush).
+    /// Builds a per-cell biome assignment using Voronoi-style scattering
+    /// of biome "sites" with feathered borders. Each cell normally falls
+    /// to its closest site, but cells near a boundary (where the
+    /// nearest two sites are roughly equidistant) probabilistically pick
+    /// the runner-up biome instead. The result: large irregular biome
+    /// regions whose borders have a wavy, blended transition zone
+    /// rather than a hard polygon edge.
+    /// <para/>
+    /// The first site is pinned to <see cref="BiomeDatabase.Plains"/>
+    /// so towns - which require grass - always have somewhere to land.
     /// </summary>
     private static Biome[] GenerateBiomeField(Random rng)
     {
         var biomeNames = new List<string>(BiomeDatabase.Names);
 
-        // Scatter sites with random biome assignments. Force the first
-        // site to be Plains so there is always grass somewhere - towns
-        // are placed on grass, and the player spawns near a town.
         var sites = new (int X, int Y, Biome Biome)[BiomeSiteCount];
         for (int i = 0; i < BiomeSiteCount; i++)
         {
@@ -237,8 +245,9 @@ public static class WorldGenerator
         {
             for (int x = 0; x < Width; x++)
             {
-                int best = 0;
-                int bestDist = int.MaxValue;
+                // Find the two closest sites for this cell.
+                int best = 0, second = 0;
+                int bestDist = int.MaxValue, secondDist = int.MaxValue;
                 for (int i = 0; i < sites.Length; i++)
                 {
                     int dx = sites[i].X - x;
@@ -246,21 +255,40 @@ public static class WorldGenerator
                     int d = dx * dx + dy * dy;
                     if (d < bestDist)
                     {
-                        bestDist = d;
-                        best = i;
+                        secondDist = bestDist; second = best;
+                        bestDist = d; best = i;
+                    }
+                    else if (d < secondDist)
+                    {
+                        secondDist = d; second = i;
                     }
                 }
-                field[y * Width + x] = sites[best].Biome;
+
+                // Border feathering: when bestDist is close to secondDist
+                // (we're near the boundary between two biomes), pick the
+                // runner-up with probability that grows toward 0.5 at
+                // the exact boundary and falls off quickly inside the
+                // dominant biome's territory.
+                Biome biome = sites[best].Biome;
+                if (secondDist < int.MaxValue && bestDist > 0)
+                {
+                    float ratio = (float)bestDist / secondDist; // 0..1
+                    // At boundary ratio ~ 1 -> swap probability ~ 0.5.
+                    // Deep inside dominant ratio ~ 0 -> swap ~ 0.
+                    float pSwap = 0.5f * ratio * ratio;
+                    if (rng.NextDouble() < pSwap)
+                        biome = sites[second].Biome;
+                }
+                field[y * Width + x] = biome;
             }
         }
         return field;
     }
 
     /// <summary>
-    /// Translate elevation through a biome's tile atlas. Water is
-    /// universal (every biome has shores). Above the waterline the biome
-    /// supplies its own coast / ground / vegetation / highland / peak
-    /// tiles.
+    /// Translate elevation through a biome's tileset. Water is universal
+    /// (every biome has shores). Above the waterline the biome supplies
+    /// its own coast / ground / vegetation / hill / peak tiles.
     /// </summary>
     private static int BiomeTileForElevation(Biome biome, float e)
     {
@@ -269,22 +297,43 @@ public static class WorldGenerator
         if (e < 0.34f) return biome.Coast;
         if (e < 0.55f) return biome.Ground;
         if (e < 0.70f) return biome.Vegetation;
-        if (e < 0.82f) return biome.Highland;
+        if (e < 0.82f) return biome.Hill;
         return biome.Peak;
     }
 
     private static bool IsGoodTownSpot(MapData map, int x, int y)
-        => map.GetTile(x, y) == TileId.Grass;
+    {
+        // Towns settle on flat, walkable ground - any biome's Ground or
+        // Coast tile counts. Also accept the legacy Grass/Sand tiles
+        // that other generators (TownGenerator etc.) still produce.
+        int t = map.GetTile(x, y);
+        if (t == TileId.Grass || t == TileId.Sand) return true;
+        foreach (var name in BiomeDatabase.Names)
+        {
+            var b = BiomeDatabase.Get(name);
+            if (t == b.Ground || t == b.Coast) return true;
+        }
+        return false;
+    }
 
     private static bool IsGoodDungeonSpot(MapData map, int x, int y)
     {
+        // Dungeons are carved into a biome's elevated rocky terrain:
+        // any Hill or Peak tile across all biomes counts, plus the
+        // legacy Hills/Mountains tiles.
         int t = map.GetTile(x, y);
-        bool rocky = t == TileId.Hills
-                  || t == TileId.Mountains
-                  || t == TileId.IcePatch
-                  || t == TileId.VolcanicRock;
-        if (!rocky) return false;
-        // Also require at least one passable neighbor so the player can
+        bool elevated = t == TileId.Hills || t == TileId.Mountains;
+        if (!elevated)
+        {
+            foreach (var name in BiomeDatabase.Names)
+            {
+                var b = BiomeDatabase.Get(name);
+                if (t == b.Hill || t == b.Peak) { elevated = true; break; }
+            }
+        }
+        if (!elevated) return false;
+
+        // Require at least one passable neighbor so the player can
         // actually step onto the dungeon tile from the world map.
         for (int dy = -1; dy <= 1; dy++)
         {
