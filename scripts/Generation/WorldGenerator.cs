@@ -117,7 +117,7 @@ public static class WorldGenerator
         //    possible, otherwise any passable tile.
         if (towns.Count > 0)
         {
-            var (tx, ty, _) = towns[0];
+            var (tx, ty, _, _) = towns[0];
             int ex = tx, ey = Math.Min(Height - 1, ty + 1);
             if (TileDatabase.IsPassable(map.GetTile(ex, ey)))
             {
